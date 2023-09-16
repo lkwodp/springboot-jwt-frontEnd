@@ -1,8 +1,9 @@
 <script setup>
 import {ref, reactive, computed} from "vue";
 import {EditPen, Lock, Message} from "@element-plus/icons-vue";
-import {get} from "@/net";
+import {get, post} from "@/net";
 import {ElMessage} from "element-plus";
+import router from "@/router";
 /*定义数据*/
 const active = ref(0)
 const codeTime = ref(0)
@@ -60,20 +61,34 @@ function askCode(){
 }
 const determineIfEmailIsCorrect = computed(()=>/^[\w.-]+@[\w.-]+\.\w+$/.test(form.email))
 
-//验证验证码是否正确
-function verificationCode(){
 
-}
 //开始重置密码
-function startReset() {
+function confirmRest() {
   formRef1.value.validate((valid)=>{
-    if (valid && verificationCode){
-      active.value++
+    if (valid ){
+      post('/api/auth/rest-confirm',{
+        email: form.email,
+        code: form.code
+      },()=> active.value++)
     }else {
       ElMessage.warning('请完整填写表单内容')
     }
   })
-
+}
+//执行重置
+function doReset() {
+  formRef1.value.validate((valid)=>{
+    if (valid){
+      post('/api/auth/rest-password',{
+        email: form.email,
+        code: form.code,
+        password: form.password
+      },()=>{
+        ElMessage.success('密码重置成功，请重新登录')
+        router.push('/')
+      })
+    }
+  })
 }
 
 </script>
@@ -110,7 +125,7 @@ function startReset() {
                 </el-input>
               </el-col>
               <el-col :span="5">
-                <el-button type="success" :disabled="! determineIfEmailIsCorrect || codeTime" @click="askCode">
+                <el-button type="success" :disabled="! determineIfEmailIsCorrect || codeTime > 0" @click="askCode">
                   {{codeTime > 0 ? `请稍后${codeTime}秒`:`获取验证码`}}
                 </el-button>
               </el-col>
@@ -119,7 +134,7 @@ function startReset() {
         </el-form>
       </div>
       <div style="margin-top: 80px">
-        <el-button style="width: 270px" type="warning" plain @click="startReset">开始重置密码</el-button>
+        <el-button style="width: 270px" type="warning" plain @click="confirmRest">开始重置密码</el-button>
       </div>
     </div>
     <div style="margin: 0 20px" v-if="active===1">
@@ -128,7 +143,7 @@ function startReset() {
         <div style="font-size: 14px;color: grey;margin-top: 10px">请输入新密码</div>
       </div>
       <div style="margin-top: 50px">
-        <el-form :model="form" :rules="rule">
+        <el-form :model="form" :rules="rule" ref="formRef1">
           <el-form-item prop="password">
             <el-input v-model="form.password" type="password" maxlength="20" placeholder="密码">
               <template #prefix>
@@ -146,7 +161,7 @@ function startReset() {
         </el-form>
       </div>
       <div style="margin-top: 80px">
-        <el-button style="width: 270px" type="danger" plain @click="">立即重置密码</el-button>
+        <el-button style="width: 270px" type="danger" plain @click="doReset">立即重置密码</el-button>
       </div>
     </div>
   </div>
