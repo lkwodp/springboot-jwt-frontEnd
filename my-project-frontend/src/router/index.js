@@ -7,11 +7,23 @@ const router = createRouter({
         path: '/',
         name: 'welcome',
         component: () => import('@/views/WelcomeView.vue'),
-        children: [{
-            path: '',
-            name: 'welcome-login',
-            component:()=>import('@/views/welcome/LoginPage.vue')
-        }]
+        children: [
+            {
+                path: '',
+                name: 'welcome-login',
+                component:()=>import('@/views/welcome/LoginPage.vue')
+            },
+            {
+                path:'register',
+                name: 'welcome-register',
+                component:()=>import('@/views/welcome/RegisterPage.vue')
+            },
+            {
+                path:'reset',
+                name: 'welcome-reset',
+                component:()=>import('@/views/welcome/ResetPage.vue')
+            }
+        ]
     },{
         path: '/index',
         name: 'index',

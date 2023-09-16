@@ -12,7 +12,11 @@
       <div>欢迎进入系统</div>
     </div>
     <div class="right-card">
-      <router-view/>
+      <router-view v-slot="{ Component}">
+        <transition name="el-fade-in-linear"  mode="out-in">
+          <component :is="Component"/>
+        </transition>
+      </router-view>
     </div>
   </div>
 
